@@ -6,9 +6,11 @@ Este repositorio está pensado para desplegarse **una instancia por consultorio*
 
 ## Puesta en marcha
 
+Necesitas una base de datos PostgreSQL corriendo (local, Docker, o un servicio como Neon/Supabase/Vercel Postgres).
+
 ```bash
 npm install
-cp .env.example .env   # ajusta SESSION_SECRET y NEXT_PUBLIC_APP_URL
+cp .env.example .env   # ajusta DATABASE_URL, SESSION_SECRET y NEXT_PUBLIC_APP_URL
 npx prisma migrate dev --name init
 npm run db:seed        # crea un consultorio, un admin y datos de ejemplo
 npm run dev
@@ -25,7 +27,7 @@ Credenciales del consultorio de ejemplo (cámbialas o crea las tuyas antes de pr
 
 - **Next.js 16** (App Router, Turbopack) + **React 19** + **TypeScript**
 - **Tailwind CSS v4** con un sistema de marca fucsia personalizable por consultorio (variables CSS `--brand-*`, editables desde `/admin/marca`)
-- **Prisma ORM** + **SQLite** para desarrollo (fácilmente migrable a PostgreSQL cambiando el `provider` del datasource y `DATABASE_URL`)
+- **Prisma ORM** + **PostgreSQL** (funciona con cualquier proveedor: Neon, Vercel Postgres, Supabase, RDS, un Postgres propio, etc.)
 - **jose** para sesiones firmadas (JWT en cookie httpOnly) y **bcryptjs** para contraseñas
 - **@anthropic-ai/sdk** para el asistente de inteligencia artificial (Claude)
 
@@ -55,7 +57,23 @@ Desde `/admin` (rol ADMIN) se puede configurar, sin tocar código:
 - Planes y precios mostrados en la landing
 - Testimonios (reemplaza los de ejemplo por opiniones reales antes de publicar)
 
-En despliegues sin almacenamiento de objetos (S3, R2, etc.), las imágenes se guardan en `public/uploads`. En plataformas serverless con sistema de archivos efímero (Vercel, por ejemplo) reemplaza `src/lib/uploads/save-upload.ts` por un proveedor de almacenamiento persistente antes de producción.
+Las imágenes subidas se guardan automáticamente en **Vercel Blob** si la variable `BLOB_READ_WRITE_TOKEN` está configurada; si no, caen a `public/uploads` (válido para correr en tu propio servidor, pero no en plataformas serverless con disco efímero).
+
+## Despliegue en Vercel
+
+1. **Sube el repositorio a GitHub** (ya está en `biocolombiaplus-max/biodentis`, rama `claude/dazzling-hawking-1bz49b` o la que uses como base).
+2. **Crea una base de datos Postgres.** La forma más simple: en el dashboard de Vercel, ve a **Storage → Create Database → Postgres** (usa Neon por debajo) y conéctala a tu proyecto — esto agrega automáticamente `DATABASE_URL` a las variables de entorno. También puedes usar Neon, Supabase o cualquier Postgres externo y pegar tú mismo la connection string.
+3. **Crea un Blob store** para que los logos e imágenes que se suban desde `/admin` persistan: **Storage → Create Database → Blob**, conéctalo al proyecto (agrega `BLOB_READ_WRITE_TOKEN` automáticamente).
+4. **Importa el proyecto en Vercel:** [vercel.com/new](https://vercel.com/new) → "Import Git Repository" → selecciona `biocolombiaplus-max/biodentis` → Framework detectado: Next.js (no cambies nada del build command, ya está configurado en `package.json` para correr `prisma generate && prisma migrate deploy && next build`).
+5. **Variables de entorno** (Project Settings → Environment Variables), además de las que Vercel ya agregó por los pasos 2 y 3:
+   - `SESSION_SECRET`: una cadena aleatoria larga (por ejemplo, generada con `openssl rand -base64 32`).
+   - `NEXT_PUBLIC_APP_URL`: la URL pública que te asigne Vercel (ej. `https://tu-consultorio.vercel.app`) — se usa para armar los enlaces de firma remota de consentimientos. Puedes dejarla vacía en el primer deploy y actualizarla después con la URL real (requiere un redeploy para tomar efecto).
+   - `ANTHROPIC_API_KEY` (opcional): actívala si quieres el asistente de IA.
+6. **Deploy.** Vercel instala dependencias, corre las migraciones contra tu base de datos y compila la app.
+7. **Carga los datos de tu consultorio real** (una sola vez): con `DATABASE_URL` de producción en tu `.env` local, corre `npm run db:seed` para tener una clínica de partida, o mejor aún, edita `prisma/seed.ts` con el nombre, NIT, colores y el usuario administrador reales de tu cliente antes de correrlo, así el primer login ya es el definitivo.
+8. Entra a `https://tu-dominio/admin` con el usuario creado y personaliza logo, colores, textos y planes desde ahí — no hace falta volver a tocar código ni redeploy para eso.
+
+Cada vez que hagas `git push` a la rama conectada, Vercel vuelve a desplegar automáticamente (y vuelve a correr `prisma migrate deploy`, aplicando solo las migraciones nuevas).
 
 ## Cumplimiento normativo — qué cubre esta base y qué falta validar
 
@@ -93,9 +111,8 @@ Los 4 planes (`Básico`, `Profesional` — recomendado, `Clínica`, `Red de Clí
 
 ## Próximos pasos sugeridos
 
-1. Conectar un proveedor de almacenamiento persistente para imágenes si se despliega en una plataforma serverless.
-2. Migrar de SQLite a PostgreSQL para producción (multiusuario concurrente).
-3. Integrar un proveedor de facturación electrónica autorizado por la DIAN.
-4. Validar y ajustar el generador de RIPS contra el anexo técnico vigente.
-5. Sumar autenticación de dos factores para el rol ADMIN.
-6. Publicar la política de tratamiento de datos personales y de habeas data del consultorio.
+1. Integrar un proveedor de facturación electrónica autorizado por la DIAN.
+2. Validar y ajustar el generador de RIPS contra el anexo técnico vigente.
+3. Sumar autenticación de dos factores para el rol ADMIN.
+4. Publicar la política de tratamiento de datos personales y de habeas data del consultorio.
+5. Si vas a operar varios consultorios distintos, evalúa mover de "una instancia por consultorio" a un modelo multi-tenant real (hoy cada instalación asume una sola clínica activa).
