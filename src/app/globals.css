@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #1b1030;
+
+  /* Marca por defecto: fucsia moderno, personalizable por consultorio desde /admin */
+  --brand-primary: #d6006e;
+  --brand-primary-light: #ff4fa0;
+  --brand-primary-dark: #9c0050;
+  --brand-secondary: #ff4fa0;
+  --brand-accent: #1b1035;
+  --brand-ink: #140a26;
+  --brand-mist: #fff0f7;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-light: var(--brand-primary-light);
+  --color-brand-primary-dark: var(--brand-primary-dark);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-mist: var(--brand-mist);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.brand-gradient {
+  background-image: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 50%, #7c3aed 100%);
+}
+
+.brand-gradient-text {
+  background-image: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 55%, #a855f7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.section-bg-overlay {
+  position: relative;
+}
+
+.section-bg-overlay > .section-bg-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+
+.section-bg-overlay > .section-bg-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.section-bg-overlay > .section-content {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes float-blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(2%, -4%) scale(1.05); }
+  66% { transform: translate(-3%, 3%) scale(0.97); }
+}
+
+.animate-float-blob {
+  animation: float-blob 14s ease-in-out infinite;
+}

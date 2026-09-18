@@ -1,0 +1,320 @@
+// BioDentis - esquema de datos
+// Cubre: multi-tenant (clinicas), branding de landing, planes,
+// usuarios/roles, pacientes, historia clinica (Resolucion 3100 de 2019),
+// consentimientos informados con firma electronica, procedimientos (CUPS),
+// citas, facturacion y generacion de archivos RIPS (Resolucion 866 de 2021).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum RolUsuario {
+  ADMIN
+  ODONTOLOGO
+  AUXILIAR
+  RECEPCION
+}
+
+enum EstadoConsentimiento {
+  PENDIENTE
+  ENVIADO
+  FIRMADO
+  RECHAZADO
+}
+
+enum EstadoCita {
+  PROGRAMADA
+  CONFIRMADA
+  ATENDIDA
+  CANCELADA
+  NO_ASISTIO
+}
+
+enum EstadoFactura {
+  BORRADOR
+  EMITIDA
+  PAGADA
+  ANULADA
+}
+
+enum TipoDocumento {
+  RC
+  TI
+  CC
+  CE
+  PA
+  PEP
+  MS
+  AS
+  CN
+}
+
+enum RegimenAfiliacion {
+  CONTRIBUTIVO
+  SUBSIDIADO
+  ESPECIAL
+  EXCEPCION
+  PARTICULAR
+  NO_ASEGURADO
+}
+
+model Clinica {
+  id              String   @id @default(cuid())
+  nombre          String
+  nit             String?
+  slogan          String?
+  telefono        String?
+  whatsapp        String?
+  email           String?
+  direccion       String?
+  ciudad          String?
+  logoUrl         String?
+  faviconUrl      String?
+  colorPrimario   String   @default("#D6006E")
+  colorSecundario String   @default("#FF4FA0")
+  colorAcento     String   @default("#1B1035")
+  planId          String?
+  plan            Plan?    @relation(fields: [planId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  usuarios                 Usuario[]
+  pacientes                Paciente[]
+  secciones                SeccionLanding[]
+  testimonios              Testimonio[]
+  procedimientos           Procedimiento[]
+  citas                    Cita[]
+  facturas                 Factura[]
+  ripsExports              RipsExport[]
+  plantillasConsentimiento PlantillaConsentimiento[]
+}
+
+model Testimonio {
+  id        String  @id @default(cuid())
+  clinicaId String
+  clinica   Clinica @relation(fields: [clinicaId], references: [id])
+  nombre    String
+  cargo     String?
+  texto     String
+  avatarUrl String?
+  orden     Int     @default(0)
+  visible   Boolean @default(true)
+}
+
+model SeccionLanding {
+  id             String  @id @default(cuid())
+  clinicaId      String
+  clinica        Clinica @relation(fields: [clinicaId], references: [id])
+  clave          String
+  titulo         String?
+  subtitulo      String?
+  imagenFondoUrl String?
+  visible        Boolean @default(true)
+  orden          Int     @default(0)
+
+  @@unique([clinicaId, clave])
+}
+
+model Plan {
+  id               String   @id @default(cuid())
+  codigo           String   @unique
+  nombre           String
+  descripcion      String?
+  precioMensual    Int
+  precioAnual      Int?
+  destacado        Boolean  @default(false)
+  orden            Int      @default(0)
+  limiteUsuarios   Int?
+  limitePacientes  Int?
+  caracteristicas  String
+  activo           Boolean  @default(true)
+
+  clinicas Clinica[]
+}
+
+model Usuario {
+  id                  String     @id @default(cuid())
+  clinicaId           String
+  clinica             Clinica    @relation(fields: [clinicaId], references: [id])
+  nombre              String
+  email               String     @unique
+  passwordHash        String
+  rol                 RolUsuario @default(ODONTOLOGO)
+  registroProfesional String?
+  firmaUrl            String?
+  activo              Boolean    @default(true)
+  createdAt           DateTime   @default(now())
+
+  historias HistoriaClinica[]
+  citas     Cita[]
+}
+
+model Paciente {
+  id                 String            @id @default(cuid())
+  clinicaId          String
+  clinica            Clinica           @relation(fields: [clinicaId], references: [id])
+  tipoDocumento      TipoDocumento
+  numeroDocumento    String
+  primerNombre       String
+  segundoNombre      String?
+  primerApellido     String
+  segundoApellido    String?
+  fechaNacimiento    DateTime
+  sexo               String
+  genero             String?
+  regimenAfiliacion  RegimenAfiliacion @default(PARTICULAR)
+  eps                String?
+  zonaResidencia     String?
+  paisResidencia     String            @default("COLOMBIA")
+  departamento       String?
+  municipio          String?
+  direccion          String?
+  telefono           String?
+  celular            String?
+  email              String?
+  ocupacion          String?
+  acudienteNombre    String?
+  acudienteTelefono  String?
+  grupoEtnico        String?
+  discapacidad       String?
+  habeasDataAceptado Boolean           @default(false)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  historias       HistoriaClinica[]
+  consentimientos ConsentimientoInformado[]
+  citas           Cita[]
+  facturas        Factura[]
+
+  @@unique([clinicaId, tipoDocumento, numeroDocumento])
+}
+
+model HistoriaClinica {
+  id            String   @id @default(cuid())
+  clinicaId     String
+  pacienteId    String
+  paciente      Paciente @relation(fields: [pacienteId], references: [id])
+  profesionalId String
+  profesional   Usuario  @relation(fields: [profesionalId], references: [id])
+
+  fechaAtencion                DateTime  @default(now())
+  finalidadConsulta            String?
+  causaExterna                 String?
+  motivoConsulta                String
+  enfermedadActual             String?
+  antecedentesPersonales       String?
+  antecedentesFamiliares       String?
+  antecedentesOdontologicos    String?
+  signosVitalesJson            String?
+  examenExtraoral              String?
+  examenIntraoral              String?
+  odontogramaJson              String?
+  diagnosticosJson             String?
+  planTratamientoJson          String?
+  procedimientosRealizadosJson String?
+  observaciones                String?
+  recomendaciones              String?
+  proximoControl               DateTime?
+  firmaProfesionalUrl          String?
+  firmadaEn                    DateTime?
+  bloqueada                    Boolean   @default(false)
+  createdAt                    DateTime  @default(now())
+  updatedAt                    DateTime  @updatedAt
+}
+
+model PlantillaConsentimiento {
+  id            String  @id @default(cuid())
+  clinicaId     String
+  clinica       Clinica @relation(fields: [clinicaId], references: [id])
+  nombre        String
+  procedimiento String?
+  contenido     String
+  activo        Boolean @default(true)
+  createdAt     DateTime @default(now())
+
+  consentimientos ConsentimientoInformado[]
+}
+
+model ConsentimientoInformado {
+  id                  String                   @id @default(cuid())
+  pacienteId          String
+  paciente            Paciente                 @relation(fields: [pacienteId], references: [id])
+  plantillaId         String?
+  plantilla           PlantillaConsentimiento? @relation(fields: [plantillaId], references: [id])
+  titulo              String
+  contenido           String
+  estado              EstadoConsentimiento     @default(PENDIENTE)
+  tokenFirmaRemota    String?                  @unique
+  firmaPacienteBase64 String?
+  firmaTestigoBase64  String?
+  nombreTestigo       String?
+  ip                  String?
+  dispositivo         String?
+  enviadoEn           DateTime?
+  firmadoEn           DateTime?
+  createdAt           DateTime                 @default(now())
+}
+
+model Procedimiento {
+  id         String  @id @default(cuid())
+  clinicaId  String
+  clinica    Clinica @relation(fields: [clinicaId], references: [id])
+  codigoCups String
+  nombre     String
+  valor      Int
+  activo     Boolean @default(true)
+
+  @@unique([clinicaId, codigoCups])
+}
+
+model Cita {
+  id            String     @id @default(cuid())
+  clinicaId     String
+  clinica       Clinica    @relation(fields: [clinicaId], references: [id])
+  pacienteId    String
+  paciente      Paciente   @relation(fields: [pacienteId], references: [id])
+  profesionalId String
+  profesional   Usuario    @relation(fields: [profesionalId], references: [id])
+  fechaHora     DateTime
+  duracionMin   Int        @default(30)
+  motivo        String?
+  estado        EstadoCita @default(PROGRAMADA)
+  notas         String?
+  createdAt     DateTime   @default(now())
+}
+
+model Factura {
+  id          String        @id @default(cuid())
+  clinicaId   String
+  clinica     Clinica       @relation(fields: [clinicaId], references: [id])
+  pacienteId  String
+  paciente    Paciente      @relation(fields: [pacienteId], references: [id])
+  numero      String
+  itemsJson   String
+  subtotal    Int
+  descuento   Int           @default(0)
+  total       Int
+  estado      EstadoFactura @default(BORRADOR)
+  metodoPago  String?
+  cufe        String?
+  createdAt   DateTime      @default(now())
+
+  @@unique([clinicaId, numero])
+}
+
+model RipsExport {
+  id             String   @id @default(cuid())
+  clinicaId      String
+  clinica        Clinica  @relation(fields: [clinicaId], references: [id])
+  periodoInicio  DateTime
+  periodoFin     DateTime
+  tipo           String
+  contenido      String
+  totalRegistros Int
+  createdAt      DateTime @default(now())
+}
