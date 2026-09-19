@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import { Reveal } from "@/components/ui/reveal";
 
 type Tone = "light" | "mist" | "dark";
 
@@ -39,14 +40,16 @@ export function SectionShell({
           }}
           aria-hidden
         />
-        <div className={`section-content ${tone === "dark" ? "text-white" : ""}`}>{children}</div>
+        <div className={`section-content ${tone === "dark" ? "text-white" : ""}`}>
+          <Reveal>{children}</Reveal>
+        </div>
       </section>
     );
   }
 
   return (
     <section id={id} className={`py-20 sm:py-28 ${toneClasses[tone]} ${className}`}>
-      {children}
+      <Reveal>{children}</Reveal>
     </section>
   );
 }

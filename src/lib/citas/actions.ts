@@ -4,11 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/guard";
+import { MENSAJE_DEMO_SOLO_LECTURA } from "@/lib/demo/constants";
 
 export type FormState = { error?: string };
 
 export async function crearCitaAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const session = await requireSession();
+  if (session.esDemo) return { error: MENSAJE_DEMO_SOLO_LECTURA };
   const pacienteId = String(formData.get("pacienteId") ?? "");
   const fechaHora = String(formData.get("fechaHora") ?? "");
   const duracionMin = Number(formData.get("duracionMin") ?? 30) || 30;
@@ -42,6 +44,7 @@ const ESTADOS_VALIDOS = ["PROGRAMADA", "CONFIRMADA", "ATENDIDA", "CANCELADA", "N
 
 export async function actualizarEstadoCitaAction(formData: FormData) {
   const session = await requireSession();
+  if (session.esDemo) return;
   const id = String(formData.get("id"));
   const estado = String(formData.get("estado"));
   if (!ESTADOS_VALIDOS.includes(estado as (typeof ESTADOS_VALIDOS)[number])) return;

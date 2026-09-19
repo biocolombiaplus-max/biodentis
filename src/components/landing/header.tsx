@@ -47,8 +47,8 @@ export function LandingHeader({
           <Link href="/login" className="text-sm font-semibold text-slate-600 hover:text-[var(--brand-primary)]">
             Ingresar
           </Link>
-          <ButtonLink href="#cta-final" size="md">
-            Agenda una demo
+          <ButtonLink href="/api/demo" size="md">
+            Ver demo en vivo
           </ButtonLink>
         </div>
 
@@ -79,8 +79,8 @@ export function LandingHeader({
             <Link href="/login" className="text-sm font-semibold text-[var(--brand-primary)]">
               Ingresar
             </Link>
-            <ButtonLink href="#cta-final" size="md" className="justify-center">
-              Agenda una demo
+            <ButtonLink href="/api/demo" size="md" className="justify-center">
+              Ver demo en vivo
             </ButtonLink>
           </nav>
         </div>

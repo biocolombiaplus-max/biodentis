@@ -76,7 +76,7 @@ export function Beneficios({
           {FEATURES.map((f) => (
             <div
               key={f.titulo}
-              className="group rounded-2xl border border-black/5 p-6 transition hover:border-[var(--brand-primary)]/30 hover:shadow-lg"
+              className="group rounded-2xl border border-black/5 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--brand-primary)]/30 hover:shadow-xl"
             >
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--brand-mist)] text-[var(--brand-primary)] transition group-hover:brand-gradient group-hover:text-white">
                 <f.icon size={22} />

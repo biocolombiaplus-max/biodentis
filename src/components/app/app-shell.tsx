@@ -10,8 +10,9 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-import { logoutAction } from "@/lib/auth/actions";
+import { logoutAction, salirDemoAction } from "@/lib/auth/actions";
 import type { SessionPayload } from "@/lib/auth/session";
+import { DemoBanner } from "@/components/app/demo-banner";
 
 const NAV = [
   { href: "/app", label: "Panel", icon: LayoutDashboard },
@@ -60,7 +61,7 @@ export function AppShell({
               {item.label}
             </Link>
           ))}
-          {session.rol === "ADMIN" ? (
+          {session.rol === "ADMIN" && !session.esDemo ? (
             <Link
               href="/admin/marca"
               className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-[var(--brand-mist)] hover:text-[var(--brand-primary)]"
@@ -73,17 +74,22 @@ export function AppShell({
         <div className="border-t border-black/5 p-3">
           <div className="mb-2 rounded-xl bg-slate-50 px-3 py-2.5">
             <p className="truncate text-sm font-semibold text-[var(--brand-accent)]">{session.nombre}</p>
-            <p className="text-xs capitalize text-slate-500">{session.rol.toLowerCase()}</p>
+            <p className="text-xs capitalize text-slate-500">
+              {session.esDemo ? "Modo demo" : session.rol.toLowerCase()}
+            </p>
           </div>
-          <form action={logoutAction}>
+          <form action={session.esDemo ? salirDemoAction : logoutAction}>
             <button className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100">
-              <LogOut size={17} /> Cerrar sesión
+              <LogOut size={17} /> {session.esDemo ? "Salir de la demo" : "Cerrar sesión"}
             </button>
           </form>
         </div>
       </aside>
 
-      <main className="flex-1 px-5 py-8 sm:px-10">{children}</main>
+      <div className="flex min-w-0 flex-1 flex-col">
+        {session.esDemo ? <DemoBanner /> : null}
+        <main className="flex-1 px-5 py-8 sm:px-10">{children}</main>
+      </div>
     </div>
   );
 }

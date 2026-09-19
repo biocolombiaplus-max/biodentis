@@ -17,20 +17,26 @@ export function CtaFinal({
         {subtitulo ? <p className="mt-4 text-lg text-white/85">{subtitulo}</p> : null}
 
         <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <ButtonLink href="/api/demo" variant="dark" size="lg">
+            Ver demo en vivo
+          </ButtonLink>
           {whatsapp ? (
             <ButtonLink
               href={`https://wa.me/${whatsapp}?text=${encodeURIComponent("Hola, quiero conocer más sobre BioDentis para mi consultorio")}`}
-              variant="dark"
               size="lg"
+              variant="outline"
+              className="border-white text-white hover:bg-white hover:text-[var(--brand-primary)]"
               target="_blank"
             >
               Escríbenos por WhatsApp
             </ButtonLink>
           ) : null}
-          <ButtonLink href="/login" size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-[var(--brand-primary)]">
-            Ya soy cliente, ingresar
-          </ButtonLink>
         </div>
+        <p className="mt-5 text-sm text-white/70">
+          <a href="/login" className="underline decoration-white/40 underline-offset-2 hover:text-white">
+            Ya soy cliente, ingresar
+          </a>
+        </p>
       </div>
     </section>
   );

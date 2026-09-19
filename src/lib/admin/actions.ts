@@ -5,6 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/guard";
 import { saveUploadedImage } from "@/lib/uploads/save-upload";
+import { MENSAJE_DEMO_SOLO_LECTURA } from "@/lib/demo/constants";
 
 export type FormState = { error?: string; ok?: boolean };
 
@@ -24,6 +25,7 @@ const marcaSchema = z.object({
 
 export async function updateMarcaAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const session = await requireRole(["ADMIN"]);
+  if (session.esDemo) return { error: MENSAJE_DEMO_SOLO_LECTURA };
 
   const parsed = marcaSchema.safeParse({
     nombre: formData.get("nombre"),
@@ -72,6 +74,7 @@ export async function updateMarcaAction(_prev: FormState, formData: FormData): P
 
 export async function updateSeccionAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const session = await requireRole(["ADMIN"]);
+  if (session.esDemo) return { error: MENSAJE_DEMO_SOLO_LECTURA };
 
   const id = String(formData.get("id"));
   const titulo = String(formData.get("titulo") ?? "");
@@ -117,7 +120,8 @@ const planSchema = z.object({
 });
 
 export async function updatePlanAction(_prev: FormState, formData: FormData): Promise<FormState> {
-  await requireRole(["ADMIN"]);
+  const session = await requireRole(["ADMIN"]);
+  if (session.esDemo) return { error: MENSAJE_DEMO_SOLO_LECTURA };
 
   const parsed = planSchema.safeParse({
     id: formData.get("id"),
@@ -163,6 +167,7 @@ export async function updatePlanAction(_prev: FormState, formData: FormData): Pr
 
 export async function upsertTestimonioAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const session = await requireRole(["ADMIN"]);
+  if (session.esDemo) return { error: MENSAJE_DEMO_SOLO_LECTURA };
 
   const id = formData.get("id");
   const nombre = String(formData.get("nombre") ?? "").trim();
@@ -189,7 +194,8 @@ export async function upsertTestimonioAction(_prev: FormState, formData: FormDat
 }
 
 export async function eliminarTestimonioAction(formData: FormData) {
-  await requireRole(["ADMIN"]);
+  const session = await requireRole(["ADMIN"]);
+  if (session.esDemo) return;
   const id = String(formData.get("id"));
   await prisma.testimonio.delete({ where: { id } });
   revalidatePath("/");

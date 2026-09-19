@@ -1,4 +1,5 @@
 import { getLandingData, seccionPorClave } from "@/lib/clinica";
+import { AnnouncementBar } from "@/components/landing/announcement-bar";
 import { LandingHeader } from "@/components/landing/header";
 import { Hero } from "@/components/landing/hero";
 import { Confianza } from "@/components/landing/confianza";
@@ -34,6 +35,7 @@ export default async function LandingPage() {
 
   return (
     <>
+      <AnnouncementBar />
       <LandingHeader nombre={clinica.nombre} logoUrl={clinica.logoUrl} />
 
       <main>

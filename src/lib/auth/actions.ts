@@ -42,3 +42,8 @@ export async function logoutAction() {
   await clearSessionCookie();
   redirect("/login");
 }
+
+export async function salirDemoAction() {
+  await clearSessionCookie();
+  redirect("/");
+}

@@ -45,7 +45,10 @@ export function Confianza({
 
         <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {ITEMS.map((item) => (
-            <div key={item.titulo} className="rounded-2xl border border-black/5 bg-white p-6 shadow-sm">
+            <div
+              key={item.titulo}
+              className="rounded-2xl border border-black/5 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+            >
               <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl brand-gradient text-white">
                 <item.icon size={20} />
               </div>

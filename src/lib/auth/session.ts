@@ -19,6 +19,8 @@ export type SessionPayload = {
   rol: string;
   nombre: string;
   email: string;
+  /** Sesión de la demo pública: navegación completa, pero de solo lectura. */
+  esDemo?: boolean;
 };
 
 export async function createSessionToken(payload: SessionPayload): Promise<string> {

@@ -4,6 +4,23 @@ Software de gestión para consultorios odontológicos en Colombia: landing page 
 
 Este repositorio está pensado para desplegarse **una instancia por consultorio**: cada instalación tiene su propia base de datos, su propia marca (logo, colores, textos e imágenes) y sus propios usuarios.
 
+## Demo pública
+
+El botón "Ver demo en vivo" (header, hero y CTA final de la landing) lleva a `/api/demo`, que crea una
+sesión de solo lectura en un **consultorio sandbox aislado** (`clinica-demo-sandbox`, con pacientes,
+historias, consentimientos y facturas ficticias). El visitante puede navegar todo `/app` como si fuera un
+usuario real, pero:
+
+- Cada acción que guarda datos (crear paciente, firmar, facturar, generar RIPS, editar marca, etc.)
+  devuelve un mensaje de "demo de solo lectura" en vez de escribir en la base de datos.
+- `/admin` está bloqueado por completo para esta sesión (redirige a `/app`).
+- El asistente de IA responde con un ejemplo fijo, sin llamar a la API real.
+
+Esto garantiza que un visitante anónimo nunca pueda ver ni modificar los datos reales de un consultorio
+que use esta misma instancia en producción — viven en clínicas (filas de `Clinica`) completamente
+distintas. Los datos de la demo se pueden "refrescar" (fechas de citas, etc.) volviendo a visitar
+`/api/setup?key=...` (ver sección de despliegue), ya que también reseedea el sandbox.
+
 ## Puesta en marcha
 
 Necesitas una base de datos PostgreSQL corriendo (local, Docker, o un servicio como Neon/Supabase/Vercel Postgres).

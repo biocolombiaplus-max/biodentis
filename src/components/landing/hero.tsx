@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 
 export function Hero({
@@ -45,15 +47,22 @@ export function Hero({
           <p className="mx-auto mt-6 max-w-2xl text-lg text-white/70">{subtitulo}</p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <ButtonLink href="#cta-final" size="lg">
-              Agenda una demo gratis
+            <ButtonLink href="/api/demo" size="lg" className="shadow-xl shadow-fuchsia-900/40">
+              Ver demo en vivo <ArrowRight size={18} className="ml-1" />
             </ButtonLink>
             <ButtonLink href="#planes" size="lg" variant="outline" className="border-white/30 text-white hover:bg-white hover:text-[var(--brand-ink)]">
               Ver planes y precios
             </ButtonLink>
           </div>
 
-          <div className="mt-14 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm text-white/50">
+          <p className="mt-4 text-sm text-white/50">
+            Sin registro, sin tarjeta ·{" "}
+            <a href="#cta-final" className="underline decoration-white/30 underline-offset-2 hover:text-white">
+              o agenda una demo guiada con nuestro equipo
+            </a>
+          </p>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm text-white/50">
             <span>✓ Sin instalar software</span>
             <span>✓ Soporte en Colombia</span>
             <span>✓ Cancela cuando quieras</span>
@@ -68,8 +77,11 @@ export function Hero({
 
 function HeroMockup() {
   return (
-    <div className="relative mx-auto mt-16 max-w-4xl">
-      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-2 shadow-2xl backdrop-blur">
+    <Link href="/api/demo" className="group relative mx-auto mt-16 block max-w-4xl">
+      <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2 rounded-full border border-white/15 bg-[var(--brand-ink)] px-4 py-1.5 text-xs font-semibold text-white opacity-0 shadow-lg transition-opacity duration-300 group-hover:opacity-100">
+        Haz clic para explorarlo tú mismo →
+      </div>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-2 shadow-2xl backdrop-blur transition-transform duration-500 group-hover:-translate-y-1 group-hover:border-white/20">
         <div className="flex items-center gap-1.5 border-b border-white/10 px-3 py-2.5">
           <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
           <span className="h-2.5 w-2.5 rounded-full bg-amber-400/70" />
@@ -105,6 +117,6 @@ function HeroMockup() {
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

@@ -6,11 +6,13 @@ import { headers } from "next/headers";
 import crypto from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/guard";
+import { MENSAJE_DEMO_SOLO_LECTURA } from "@/lib/demo/constants";
 
 export type FormState = { error?: string };
 
 export async function crearConsentimientoAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const session = await requireSession();
+  if (session.esDemo) return { error: MENSAJE_DEMO_SOLO_LECTURA };
   const pacienteId = String(formData.get("pacienteId"));
   const plantillaId = String(formData.get("plantillaId") || "");
   const titulo = String(formData.get("titulo") ?? "").trim();
@@ -40,6 +42,7 @@ export async function crearConsentimientoAction(_prev: FormState, formData: Form
 
 export async function generarEnlaceFirmaAction(formData: FormData) {
   const session = await requireSession();
+  if (session.esDemo) return;
   const id = String(formData.get("id"));
 
   const consentimiento = await prisma.consentimientoInformado.findUnique({
@@ -62,6 +65,7 @@ export async function generarEnlaceFirmaAction(formData: FormData) {
 
 export async function firmarEnConsultorioAction(formData: FormData) {
   const session = await requireSession();
+  if (session.esDemo) return;
   const id = String(formData.get("id"));
   const firmaPacienteBase64 = String(formData.get("firmaPacienteBase64") ?? "");
   const nombreTestigo = String(formData.get("nombreTestigo") ?? "");

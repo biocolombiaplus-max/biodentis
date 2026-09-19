@@ -4,11 +4,13 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/guard";
 import { generarArchivosRips } from "@/lib/rips/generar";
+import { MENSAJE_DEMO_SOLO_LECTURA } from "@/lib/demo/constants";
 
 export type FormState = { error?: string };
 
 export async function generarRipsAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const session = await requireSession();
+  if (session.esDemo) return { error: MENSAJE_DEMO_SOLO_LECTURA };
   const periodoInicio = String(formData.get("periodoInicio") ?? "");
   const periodoFin = String(formData.get("periodoFin") ?? "");
 

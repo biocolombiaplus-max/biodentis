@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/guard";
+import { MENSAJE_DEMO_SOLO_LECTURA } from "@/lib/demo/constants";
 
 export type FormState = { error?: string };
 
@@ -54,6 +55,7 @@ function parseForm(formData: FormData) {
 
 export async function crearHistoriaAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const session = await requireSession();
+  if (session.esDemo) return { error: MENSAJE_DEMO_SOLO_LECTURA };
   const parsed = parseForm(formData);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Revisa los datos del formulario" };
@@ -79,6 +81,7 @@ export async function crearHistoriaAction(_prev: FormState, formData: FormData):
 
 export async function firmarHistoriaAction(formData: FormData) {
   const session = await requireSession();
+  if (session.esDemo) return;
   const id = String(formData.get("id"));
   const firmaProfesionalUrl = String(formData.get("firmaProfesionalUrl") ?? "");
 

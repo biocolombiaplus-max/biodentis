@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/guard";
+import { MENSAJE_DEMO_SOLO_LECTURA } from "@/lib/demo/constants";
 
 export type FormState = { error?: string };
 
@@ -11,6 +12,7 @@ type ItemFactura = { descripcion: string; cups?: string; cantidad: number; valor
 
 export async function crearFacturaAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const session = await requireSession();
+  if (session.esDemo) return { error: MENSAJE_DEMO_SOLO_LECTURA };
   const pacienteId = String(formData.get("pacienteId"));
   const metodoPago = String(formData.get("metodoPago") ?? "");
   const descuento = Number(formData.get("descuento") ?? 0) || 0;
@@ -60,6 +62,7 @@ export async function crearFacturaAction(_prev: FormState, formData: FormData): 
 
 export async function marcarFacturaPagadaAction(formData: FormData) {
   const session = await requireSession();
+  if (session.esDemo) return;
   const id = String(formData.get("id"));
 
   const factura = await prisma.factura.findUnique({ where: { id } });

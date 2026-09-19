@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireSession } from "@/lib/auth/guard";
-import { getClinicaActiva } from "@/lib/clinica";
+import { getClinicaPorId } from "@/lib/clinica";
 import { prisma } from "@/lib/prisma";
 import { marcarFacturaPagadaAction } from "@/lib/facturacion/actions";
 import { formatCOP, formatFechaCorta } from "@/lib/format";
@@ -13,7 +13,7 @@ export default async function FacturaDetallePage({ params }: PageProps<"/app/fac
 
   const [factura, clinica] = await Promise.all([
     prisma.factura.findUnique({ where: { id }, include: { paciente: true } }),
-    getClinicaActiva(),
+    getClinicaPorId(session.clinicaId),
   ]);
   if (!factura || factura.clinicaId !== session.clinicaId) notFound();
 
